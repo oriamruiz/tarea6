@@ -1,0 +1,85 @@
+﻿@page "/clima"
+
+@using System.Net.Http.Json
+
+
+<h3>
+    <i class="bi bi-gender-neuter"></i>
+    Clima en RD
+
+</h3>
+<hr />
+
+<button @onclick="GetWeather">Obtener Clima Nacional</button>
+
+@if (weather != null)
+{
+    <div class="mt-2">
+        <p>Temperatura: @weather.main.temp °C</p>
+        <p>Humedad: @weather.main.humidity % - @GetTemperatureStatus(weather.main.humidity)</p>
+        <p>Descripción: @weather.weather[0].description</p>
+    </div>
+}
+else
+{
+    <p>Haz clic en "Obtener Clima" para ver la información.</p>
+}
+
+@code {
+    private WeatherResponse weather;
+
+    private async Task GetWeather()
+    {
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var apiKey = "0db661e081183010bea61149a6c55cec";
+                var url = $"https://api.openweathermap.org/data/2.5/weather?lat=18.735693&lon=-69.89232&appid={apiKey}";
+                weather = await httpClient.GetFromJsonAsync<WeatherResponse>(url);
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            
+        }
+    }
+
+    private string GetTemperatureStatus(int humidity)
+    {
+        if (humidity > 80)
+        {
+            return "Está húmedo.";
+        }
+        else if (humidity > 50)
+        {
+            return "Moderadamente húmedo.";
+        }
+        else
+        {
+            return "Seco.";
+        }
+    }
+
+    public class WeatherResponse
+    {
+        public MainInfo main { get; set; }
+        public List<Weather> weather { get; set; }
+    }
+
+    public class MainInfo
+    {
+        public float temp { get; set; }
+        public int humidity { get; set; }
+    }
+
+    public class Weather
+    {
+        public string main { get; set; }
+        public string description { get; set; }
+        public string icon { get; set; }
+    }
+
+
+}

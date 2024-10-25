@@ -1,0 +1,83 @@
+﻿@page "/edad"
+@using System.Net.Http.Json
+
+<h3>
+    <i class="bi bi-gender-neuter"></i>
+    Predictor de edad
+
+</h3>
+<hr />
+
+<input @bind="name" placeholder="Escribe un nombre..." />
+
+<button @onclick="PredictAge">Predecir</button>
+
+@if (edad.HasValue)
+{
+    <div class="mt-2">
+        <span><strong>Edad predecida es:</strong> @edad</span> <br />
+        <span><strong>Estado:</strong> @estado</span><br />
+
+        <img src="images/@image" width="100" height="100"/>
+    </div>
+}
+
+@code {
+    private string name;
+    private string estado;
+    private int? edad;
+    private string image;
+
+    private async Task PredictAge()
+    {
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var url = $"https://api.agify.io/?name={name}";
+                var response = await httpClient.GetFromJsonAsync<EdadResponse>(url);
+
+                if (response != null)
+                {
+                    if (response.age >= 0 && response.age <= 18)
+                    {
+                        image = "joven.jpg";
+                        estado = "Joven";
+                    }
+                    else if (response.age > 18 && response.age <=66)
+                    {
+                        image = "adulto.jpg";
+                        estado = "Adulto";
+                    }
+                    else
+                    {
+                        image = "anciano.jpg";
+                        estado = "Anciano";
+                    }
+
+                    edad = response.age;
+                }
+
+                
+                
+            }
+
+        }
+        catch (Exception ex)
+        {
+            
+        }
+    }
+
+
+    public class EdadResponse
+    {
+        public int count { get; set; }
+        public string name { get; set; }
+        public int age { get; set; }
+    }
+
+
+}
+
+

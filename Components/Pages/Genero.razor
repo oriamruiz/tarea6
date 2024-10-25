@@ -1,0 +1,77 @@
+﻿@page "/genero"
+
+@using System.Net.Http.Json
+
+
+<h3>
+    <i class="bi bi-gender-neuter"></i>
+    Predictor de genero
+
+</h3>
+<hr />
+
+<input @bind="name" placeholder="Escribe un nombre..." />
+
+<button @onclick="PredictGender">Predecir</button>
+
+@if (!string.IsNullOrEmpty(gender))
+{
+    <div class="mt-2" style="background-color:@backgroundColor; color:white; padding:10px; width:150px;">
+        El género es: @gender
+    </div>
+}
+
+@code {
+    private string name;
+    private string gender;
+    private string backgroundColor;
+
+    private async Task PredictGender()
+    {
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var url = $"https://api.genderize.io/?name={name}";
+                var response = await httpClient.GetFromJsonAsync<GenderResponse>(url);
+
+                if (response != null)
+                {
+                    if (response.gender == "male")
+                    {
+                        backgroundColor = "blue";
+                        gender = "Masculino";
+                    }
+                    else if (response.gender == "female")
+                    {
+                        backgroundColor = "pink";
+                        gender = "Femenino";
+                    }
+                    else
+                    {
+                        gender = "";
+                    }
+                }
+                else
+                {
+                    gender = "Error al predecir";
+                    backgroundColor = "gray";
+                }
+            }
+            
+        }
+        catch (Exception ex)
+        {
+            gender = "Error al conectar con la API";
+            backgroundColor = "gray";
+        }
+    }
+
+    public class GenderResponse
+    {
+        public int count { get; set; }
+        public string name { get; set; }
+        public string gender { get; set; }
+        public double probability { get; set; }
+    }
+}

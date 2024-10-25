@@ -1,0 +1,74 @@
+﻿@page "/universidad"
+
+@using System.Net.Http.Json
+
+
+<h3>
+    <i class="bi bi-gender-neuter"></i>
+    Busqueda de Universidades por nombre de paises en ingles
+
+</h3>
+<hr />
+
+<input @bind="pais" placeholder="Escribe un pais en ingles..." />
+
+<button @onclick="PredictUniversity">Predecir</button>
+
+@if (Universidades !=null && Universidades.Count> 0)
+{
+    <h5 class="mt-2">Universidades de @pais (@Universidades.Count())</h5>
+
+    foreach(var u in Universidades)
+    {
+
+        string dominios = string.Join(" ", u.domains);
+        string webpages = string.Join(" ", u.web_pages);
+
+        <div class="mt-2">
+            <span><strong>Nombre:</strong> @u.name</span> <br />
+            <span><strong>dominios:</strong> @dominios </span><br />
+            <span><strong>Webs:</strong> <a href="@webpages">@webpages</a> </span><br />
+            <hr />
+        </div>
+    }
+
+    
+}
+
+@code {
+    private string pais;
+
+    private List<UniversidadResponse> Universidades;
+
+
+    private async Task PredictUniversity()
+    {
+        try
+        {
+            using (var httpClient = new HttpClient())
+            {
+                var url = $"http://universities.hipolabs.com/search?country={pais}";
+                var response = await httpClient.GetFromJsonAsync<List<UniversidadResponse>>(url);
+
+                Universidades = response;
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+
+    public class UniversidadResponse
+    {
+        public List<string> domains { get; set; }
+        public string name { get; set; }
+        public List<string> web_pages { get; set; }
+    }
+
+    
+}
+
